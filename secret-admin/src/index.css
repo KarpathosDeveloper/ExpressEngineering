@@ -1,0 +1,196 @@
+@import "tailwindcss";
+
+:root {
+  --brand-navy: #0a2540;
+  --brand-blue: #1e6091;
+  --brand-accent: #d4a017;
+  --brand-gold: #c9a227;
+  --brand-red: #b91c1c;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #fafaf7;
+  color: #1a1a1a;
+}
+
+body[data-lang="ne"] {
+  font-family: 'Noto Sans Devanagari', 'Inter', system-ui, sans-serif;
+}
+
+.font-devanagari {
+  font-family: 'Noto Sans Devanagari', 'Inter', system-ui, sans-serif;
+}
+
+.font-inter {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.bg-grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(10, 37, 64, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 37, 64, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #0a2540 0%, #1e6091 50%, #d4a017 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-bg-hero {
+  background: linear-gradient(135deg, #0a2540 0%, #103a5e 40%, #1e6091 100%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.float-anim {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fade-up 0.7s ease-out backwards;
+}
+
+.diagonal-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 10px,
+    rgba(212, 160, 23, 0.05) 10px,
+    rgba(212, 160, 23, 0.05) 20px
+  );
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Accessibility Styles */
+
+/* 1. Dyslexia Font style */
+body.dyslexia-font,
+body.dyslexia-font * {
+  font-family: 'Comic Sans MS', 'Dyslexic', 'Arial', sans-serif !important;
+  letter-spacing: 0.15em !important;
+  word-spacing: 0.2em !important;
+  line-height: 1.6 !important;
+}
+
+/* 2. High Contrast Style */
+body.high-contrast,
+body.high-contrast * {
+  background-color: #000000 !important;
+  background-image: none !important;
+  color: #ffff00 !important; /* Yellow text is standard for high contrast */
+  border-color: #ffffff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+body.high-contrast a,
+body.high-contrast button {
+  color: #00ffff !important; /* Cyan for links/interactive in high contrast */
+  text-decoration: underline !important;
+}
+
+body.high-contrast a:hover,
+body.high-contrast button:hover {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast textarea {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffffff !important;
+}
+
+/* 3. Underline Links */
+body.underline-links a {
+  text-decoration: underline !important;
+  font-weight: bold !important;
+}
+
+/* 4. Large Cursor */
+body.large-cursor,
+body.large-cursor * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath fill='%23000' stroke='%23FFF' stroke-width='2' d='M0,0 L0,22 L6,16 L12,28 L16,26 L10,14 L18,14 Z'/%3E%3C/svg%3E"), auto !important;
+}
+
+/* Text Sizing Scale classes */
+body.text-scale-1 { font-size: 1rem; }
+body.text-scale-2 { font-size: 1.125rem; }
+body.text-scale-3 { font-size: 1.25rem; }
+body.text-scale-4 { font-size: 1.375rem; }
+body.text-scale-5 { font-size: 1.5rem; }
+
+/* ISO Compliance & Badge styling */
+.iso-badge {
+  background: linear-gradient(135deg, #0a2540 0%, #1e6091 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
