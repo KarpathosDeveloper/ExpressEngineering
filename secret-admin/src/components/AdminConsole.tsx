@@ -46,6 +46,18 @@ type Order = {
   created_at: string;
 };
 
+type Product = {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+  unit: string;
+  vendor: string;
+  rating: number;
+  image_icon: string;
+  description: string;
+};
+
 const stages = [
   "Inquiry Received",
   "Consultation Scheduled",
@@ -59,7 +71,7 @@ const stages = [
 export default function AdminConsole({ lang }: Props) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passcode, setPasscode] = useState("");
-  const [activeTab, setActiveTab] = useState<"engineers" | "inquiries" | "orders">("engineers");
+  const [activeTab, setActiveTab] = useState<"engineers" | "inquiries" | "orders" | "products">("engineers");
 
   // Engineers state
   const [engineers, setEngineers] = useState<Engineer[]>([]);
@@ -80,6 +92,20 @@ export default function AdminConsole({ lang }: Props) {
     image: "E",
   });
 
+  // Products state
+  const [products, setProducts] = useState<Product[]>([]);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productForm, setProductForm] = useState({
+    name: "",
+    category: "Construction Material",
+    price: "",
+    unit: "piece",
+    vendor: "",
+    rating: 4.8,
+    image_icon: "📦",
+    description: "",
+  });
+
   // Inquiries & Orders state
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -90,6 +116,16 @@ export default function AdminConsole({ lang }: Props) {
       const API_BASE = import.meta.env.VITE_API_URL || "";
       const res = await fetch(`${API_BASE}/api/engineers`);
       if (res.ok) setEngineers(await res.json());
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadProducts = async () => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || "";
+      const res = await fetch(`${API_BASE}/api/products`);
+      if (res.ok) setProducts(await res.json());
     } catch (err) {
       console.error(err);
     }
@@ -120,6 +156,7 @@ export default function AdminConsole({ lang }: Props) {
       loadEngineers();
       loadInquiries();
       loadOrders();
+      loadProducts();
     }
   }, [isAuthenticated]);
 
@@ -218,6 +255,84 @@ export default function AdminConsole({ lang }: Props) {
     } catch (err) {
       console.error(err);
       alert("Error deleting engineer.");
+    }
+  };
+
+  // Product actions
+  const handleProductSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const API_BASE = import.meta.env.VITE_API_URL || "";
+    const endpoint = editingProduct ? `${API_BASE}/api/products/${editingProduct.id}` : `${API_BASE}/api/products`;
+    const method = editingProduct ? "PUT" : "POST";
+
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(productForm),
+      });
+
+      if (!res.ok) throw new Error("Operation failed");
+
+      alert(
+        lang === "en"
+          ? editingProduct
+            ? "Product updated successfully"
+            : "Product added successfully"
+          : editingProduct
+          ? "सामग्री सफलतापूर्वक अपडेट भयो"
+          : "सामग्री सफलतापूर्वक थपियो"
+      );
+
+      // Reset form
+      setEditingProduct(null);
+      setProductForm({
+        name: "",
+        category: "Construction Material",
+        price: "",
+        unit: "piece",
+        vendor: "",
+        rating: 4.8,
+        image_icon: "📦",
+        description: "",
+      });
+
+      loadProducts();
+      window.dispatchEvent(new Event("products-updated"));
+    } catch (err) {
+      console.error(err);
+      alert("Error saving product.");
+    }
+  };
+
+  const startEditProduct = (prod: Product) => {
+    setEditingProduct(prod);
+    setProductForm({
+      name: prod.name,
+      category: prod.category,
+      price: String(prod.price),
+      unit: prod.unit,
+      vendor: prod.vendor,
+      rating: prod.rating,
+      image_icon: prod.image_icon || "📦",
+      description: prod.description || "",
+    });
+  };
+
+  const deleteProduct = async (id: number) => {
+    if (!confirm(lang === "en" ? "Are you sure you want to delete this product?" : "के तपाईं यो सामग्री हटाउन निश्चित हुनुहुन्छ?")) return;
+
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || "";
+      const res = await fetch(`${API_BASE}/api/products/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Delete failed");
+
+      alert(lang === "en" ? "Product deleted" : "सामग्री हटाइयो");
+      loadProducts();
+      window.dispatchEvent(new Event("products-updated"));
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting product.");
     }
   };
 
@@ -325,6 +440,14 @@ export default function AdminConsole({ lang }: Props) {
               }`}
             >
               🛒 {lang === "en" ? "Shop Orders" : "शप अर्डरहरू"}
+            </button>
+            <button
+              onClick={() => setActiveTab("products")}
+              className={`rounded-md px-4 py-2 transition-all ${
+                activeTab === "products" ? "bg-[#0a2540] text-white" : "hover:bg-slate-50 hover:text-slate-900"
+              }`}
+            >
+              🛍️ {lang === "en" ? "Shop Items" : "पसल सामग्रीहरू"}
             </button>
           </div>
         </div>
@@ -702,6 +825,204 @@ export default function AdminConsole({ lang }: Props) {
                   </tbody>
                 </table>
               )}
+            </div>
+          )}
+
+          {activeTab === "products" && (
+            <div className="grid gap-8 lg:grid-cols-12">
+              {/* Add/Edit Form */}
+              <div className="lg:col-span-5 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#0a2540] border-b pb-3 mb-4">
+                  {editingProduct
+                    ? lang === "en"
+                      ? "Edit Product"
+                      : "सामग्री सम्पादन"
+                    : lang === "en"
+                    ? "Add New Product"
+                    : "नयाँ सामग्री थप्नुहोस्"}
+                </h3>
+
+                <form onSubmit={handleProductSubmit} className="space-y-4">
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Product Name</label>
+                    <input
+                      required
+                      type="text"
+                      value={productForm.name}
+                      onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                      className="w-full rounded bg-slate-50 border p-2 text-xs outline-none focus:border-[#0a2540] focus:bg-white"
+                      placeholder="e.g. Shivam OPC Cement (Grade 43)"
+                    />
+                  </div>
+
+                  <div className="grid gap-4 grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Category</label>
+                      <select
+                        value={productForm.category}
+                        onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                        className="w-full rounded bg-slate-50 border p-2 text-xs outline-none focus:border-[#0a2540] focus:bg-white"
+                      >
+                        <option value="Construction Material">Construction Material</option>
+                        <option value="Interior Design">Interior Design</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Supplier / Vendor</label>
+                      <input
+                        required
+                        type="text"
+                        value={productForm.vendor}
+                        onChange={(e) => setProductForm({ ...productForm, vendor: e.target.value })}
+                        className="w-full rounded bg-slate-50 border p-2 text-xs outline-none focus:border-[#0a2540] focus:bg-white"
+                        placeholder="e.g. Shivam Cement Ltd."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 grid-cols-3">
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Price (NPR)</label>
+                      <input
+                        required
+                        type="number"
+                        value={productForm.price}
+                        onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                        className="w-full rounded bg-slate-50 border p-2 text-xs outline-none focus:border-[#0a2540] focus:bg-white"
+                        placeholder="780"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Unit</label>
+                      <input
+                        required
+                        type="text"
+                        value={productForm.unit}
+                        onChange={(e) => setProductForm({ ...productForm, unit: e.target.value })}
+                        className="w-full rounded bg-slate-50 border p-2 text-xs outline-none focus:border-[#0a2540] focus:bg-white"
+                        placeholder="bag, kg, set, etc."
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Rating</label>
+                      <input
+                        required
+                        type="number"
+                        step="0.1"
+                        min="1"
+                        max="5"
+                        value={productForm.rating}
+                        onChange={(e) => setProductForm({ ...productForm, rating: Number(e.target.value) })}
+                        className="w-full rounded bg-slate-50 border p-2 text-xs outline-none focus:border-[#0a2540] focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 grid-cols-2">
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Emoji Icon</label>
+                      <input
+                        required
+                        type="text"
+                        value={productForm.image_icon}
+                        onChange={(e) => setProductForm({ ...productForm, image_icon: e.target.value })}
+                        className="w-full rounded bg-slate-50 border p-2 text-xs outline-none focus:border-[#0a2540] focus:bg-white"
+                        placeholder="🧱"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase text-slate-500">Description</label>
+                    <textarea
+                      rows={3}
+                      value={productForm.description}
+                      onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                      className="w-full resize-none rounded bg-slate-50 border p-2 text-xs outline-none focus:border-[#0a2540] focus:bg-white"
+                      placeholder="Product details, specs, guidelines..."
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    {editingProduct && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingProduct(null);
+                          setProductForm({
+                            name: "",
+                            category: "Construction Material",
+                            price: "",
+                            unit: "piece",
+                            vendor: "",
+                            rating: 4.8,
+                            image_icon: "📦",
+                            description: "",
+                          });
+                        }}
+                        className="w-1/3 rounded-lg border border-slate-200 py-2.5 text-xs font-semibold hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                    <button
+                      type="submit"
+                      className={`rounded-lg py-2.5 text-xs font-bold text-white transition ${
+                        editingProduct ? "w-2/3 bg-emerald-600 hover:bg-emerald-700" : "w-full bg-[#0a2540] hover:bg-[#1e6091]"
+                      }`}
+                    >
+                      {editingProduct ? "Save Changes" : "Add Product"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* List View */}
+              <div className="lg:col-span-7 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm overflow-x-auto">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-[#0a2540] border-b pb-3 mb-4">
+                  {lang === "en" ? "Shop Catalog Registry" : "पसल सामग्री सूची"}
+                </h3>
+
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-150 text-slate-400 font-bold uppercase tracking-wider">
+                      <th className="py-2.5">Icon</th>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Vendor</th>
+                      <th className="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products.map((p) => (
+                      <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50/50">
+                        <td className="py-3 text-lg">{p.image_icon}</td>
+                        <td className="font-semibold text-slate-900">{p.name}</td>
+                        <td className="text-slate-500 font-medium">{p.category}</td>
+                        <td className="font-bold text-slate-700">Rs. {p.price} / {p.unit}</td>
+                        <td className="text-slate-500">{p.vendor}</td>
+                        <td className="text-center">
+                          <div className="inline-flex gap-2">
+                            <button
+                              onClick={() => startEditProduct(p)}
+                              className="rounded bg-blue-50 border border-blue-200 px-2.5 py-1 text-[10px] font-bold text-[#1e6091] hover:bg-blue-100"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteProduct(p.id)}
+                              className="rounded bg-red-50 border border-red-200 px-2.5 py-1 text-[10px] font-bold text-red-600 hover:bg-red-100"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

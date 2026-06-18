@@ -204,6 +204,25 @@ function initTables() {
         if (err) console.error("Error creating orders table:", err);
       }
     );
+
+    // 4. Create Products Table
+    db.run(
+      `CREATE TABLE IF NOT EXISTS products (
+        id ${serialType},
+        name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        price INTEGER NOT NULL,
+        unit TEXT NOT NULL,
+        vendor TEXT NOT NULL,
+        rating REAL DEFAULT 4.8,
+        image_icon TEXT,
+        description TEXT
+      )`,
+      (err) => {
+        if (err) console.error("Error creating products table:", err);
+        else seedProducts();
+      }
+    );
   });
 }
 
@@ -309,6 +328,120 @@ function seedEngineers() {
       });
       stmt.finalize();
       console.log("Default engineers seeded successfully!");
+    }
+  });
+function seedProducts() {
+  db.get("SELECT COUNT(*) as count FROM products", [], (err, row) => {
+    if (err) {
+      console.error("Error checking product count:", err);
+      return;
+    }
+
+    if (row && Number(row.count) === 0) {
+      console.log("Seeding default products data...");
+      const defaultProducts = [
+        {
+          name: "Shivam OPC Cement (Grade 43)",
+          category: "Construction Material",
+          price: 780,
+          unit: "bag",
+          vendor: "Shivam Cement Ltd.",
+          rating: 4.8,
+          image_icon: "🧱",
+          description: "Premium grade Ordinary Portland Cement, ideal for high-strength RCC structural castings.",
+        },
+        {
+          name: "Jagdamba Fe 500D TMT Steel Rebar",
+          category: "Construction Material",
+          price: 98,
+          unit: "kg",
+          vendor: "Jagdamba Steels",
+          rating: 4.9,
+          image_icon: "⛓️",
+          description: "Thermo-mechanically treated high-ductility steel rebar, seismic-resistant certified.",
+        },
+        {
+          name: "Red Clay Bricks (First Class)",
+          category: "Construction Material",
+          price: 16,
+          unit: "piece",
+          vendor: "Baneshwor Brick Industry",
+          rating: 4.5,
+          image_icon: "🧱",
+          description: "Standard kiln-burned clay building bricks, uniform size and high compressive strength.",
+        },
+        {
+          name: "Washed River Sand (Fine Grade)",
+          category: "Construction Material",
+          price: 4200,
+          unit: "tipper (m3)",
+          vendor: "Trishuli Sand Aggregates",
+          rating: 4.6,
+          image_icon: "⏳",
+          description: "Double-washed river sand, low silt content, ideal for plastering and concrete mix.",
+        },
+        {
+          name: "Premium Italian Statuario Marble",
+          category: "Interior Design",
+          price: 650,
+          unit: "sq. ft.",
+          vendor: "Kathmandu Stone & Marble House",
+          rating: 4.9,
+          image_icon: "💎",
+          description: "Luxury white Italian marble with elegant gray veining, polished finish for floors.",
+        },
+        {
+          name: "Modular Acrylic Kitchen Cabinet Set",
+          category: "Interior Design",
+          price: 185000,
+          unit: "set",
+          vendor: "Classic Kitchens & Decors",
+          rating: 4.7,
+          image_icon: "🍳",
+          description: "Waterproof marine-plywood kitchen with soft-close acrylic drawers, built-in chimney space.",
+        },
+        {
+          name: "Modern Nordic LED Chandelier",
+          category: "Interior Design",
+          price: 14500,
+          unit: "piece",
+          vendor: "Nepal Lights & Fixtures",
+          rating: 4.8,
+          image_icon: "💡",
+          description: "Adjustable 3-color tone warm-to-cool LED ceiling light, minimalist gold ring profile.",
+        },
+        {
+          name: "Handwoven Royal Woolen Carpet",
+          category: "Interior Design",
+          price: 38000,
+          unit: "piece (6x9 ft)",
+          vendor: "Himalayan Carpet Weavers",
+          rating: 4.7,
+          image_icon: "🧶",
+          description: "100-knot pure Nepalese sheep wool rug with traditional organic dye designs.",
+        },
+      ];
+
+      const stmt = db.prepare(
+        `INSERT INTO products (
+          name, category, price, unit, vendor, rating, image_icon, description
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      );
+
+      defaultProducts.forEach((p) => {
+        stmt.run(
+          p.name,
+          p.category,
+          p.price,
+          p.unit,
+          p.vendor,
+          p.rating,
+          p.image_icon,
+          p.description
+        );
+      });
+      stmt.finalize();
+      console.log("Default products seeded successfully!");
     }
   });
 }

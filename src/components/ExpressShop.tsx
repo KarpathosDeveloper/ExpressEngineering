@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Lang } from "../i18n";
 
 type Props = { lang: Lang };
@@ -15,105 +15,14 @@ type Product = {
   desc: string;
 };
 
-const products: Product[] = [
-  // Construction Materials
-  {
-    id: 1,
-    name: "Shivam OPC Cement (Grade 43)",
-    category: "Construction Material",
-    price: 780,
-    unit: "bag",
-    vendor: "Shivam Cement Ltd.",
-    rating: 4.8,
-    imageIcon: "🧱",
-    desc: "Premium grade Ordinary Portland Cement, ideal for high-strength RCC structural castings.",
-  },
-  {
-    id: 2,
-    name: "Jagdamba Fe 500D TMT Steel Rebar",
-    category: "Construction Material",
-    price: 98,
-    unit: "kg",
-    vendor: "Jagdamba Steels",
-    rating: 4.9,
-    imageIcon: "⛓️",
-    desc: "Thermo-mechanically treated high-ductility steel rebar, seismic-resistant certified.",
-  },
-  {
-    id: 3,
-    name: "Red Clay Bricks (First Class)",
-    category: "Construction Material",
-    price: 16,
-    unit: "piece",
-    vendor: "Baneshwor Brick Industry",
-    rating: 4.5,
-    imageIcon: "🧱",
-    desc: "Standard kiln-burned clay building bricks, uniform size and high compressive strength.",
-  },
-  {
-    id: 4,
-    name: "Washed River Sand (Fine Grade)",
-    category: "Construction Material",
-    price: 4200,
-    unit: "tipper (m3)",
-    vendor: "Trishuli Sand Aggregates",
-    rating: 4.6,
-    imageIcon: "⏳",
-    desc: "Double-washed river sand, low silt content, ideal for plastering and concrete mix.",
-  },
-  // Interior Designs
-  {
-    id: 5,
-    name: "Premium Italian Statuario Marble",
-    category: "Interior Design",
-    price: 650,
-    unit: "sq. ft.",
-    vendor: "Kathmandu Stone & Marble House",
-    rating: 4.9,
-    imageIcon: "💎",
-    desc: "Luxury white Italian marble with elegant gray veining, polished finish for floors.",
-  },
-  {
-    id: 6,
-    name: "Modular Acrylic Kitchen Cabinet Set",
-    category: "Interior Design",
-    price: 185000,
-    unit: "set",
-    vendor: "Classic Kitchens & Decors",
-    rating: 4.7,
-    imageIcon: "🍳",
-    desc: "Waterproof marine-plywood kitchen with soft-close acrylic drawers, built-in chimney space.",
-  },
-  {
-    id: 7,
-    name: "Modern Nordic LED Chandelier",
-    category: "Interior Design",
-    price: 14500,
-    unit: "piece",
-    vendor: "Nepal Lights & Fixtures",
-    rating: 4.8,
-    imageIcon: "💡",
-    desc: "Adjustable 3-color tone warm-to-cool LED ceiling light, minimalist gold ring profile.",
-  },
-  {
-    id: 8,
-    name: "Handwoven Royal Woolen Carpet",
-    category: "Interior Design",
-    price: 38000,
-    unit: "piece (6x9 ft)",
-    vendor: "Himalayan Carpet Weavers",
-    rating: 4.7,
-    imageIcon: "🧶",
-    desc: "100-knot pure Nepalese sheep wool rug with traditional organic dye designs.",
-  },
-];
-
 type CartItem = {
   product: Product;
   quantity: number;
 };
 
 export default function ExpressShop({ lang }: Props) {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<"All" | "Construction Material" | "Interior Design">("All");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -123,6 +32,38 @@ export default function ExpressShop({ lang }: Props) {
     address: "",
   });
   const [orderPlaced, setOrderPlaced] = useState(false);
+
+  const fetchProducts = async () => {
+    try {
+      const API_BASE = import.meta.env.VITE_API_URL || "";
+      const response = await fetch(`${API_BASE}/api/products`);
+      if (!response.ok) throw new Error("Failed to load products");
+      const data = await response.json();
+      const mapped = data.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        unit: p.unit,
+        vendor: p.vendor,
+        rating: p.rating,
+        imageIcon: p.image_icon || "📦",
+        desc: p.description || "",
+      }));
+      setProducts(mapped);
+    } catch (err) {
+      console.error("Error loading products:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+    const handleUpdate = () => fetchProducts();
+    window.addEventListener("products-updated", handleUpdate);
+    return () => window.removeEventListener("products-updated", handleUpdate);
+  }, []);
 
   const addToCart = (product: Product) => {
     setCart((prevCart) => {
@@ -287,68 +228,78 @@ export default function ExpressShop({ lang }: Props) {
         </div>
 
         {/* Product Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {filteredProducts.map((p) => (
-            <div
-              key={p.id}
-              className="group rounded-2xl border border-slate-200 bg-white p-5 hover:border-slate-350 transition-all hover:-translate-y-0.5 hover:shadow-lg flex flex-col justify-between"
-            >
-              <div>
-                {/* Visual Icon Box */}
-                <div className="h-44 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-5xl transition-transform group-hover:scale-105 duration-350">
-                  {p.imageIcon}
-                </div>
-
-                <div className="mt-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      {p.category === "Construction Material" ? "Material" : "Interior"}
-                    </span>
-                    <span className="text-[10px] text-[#1e6091] font-bold bg-blue-50/70 border border-blue-100/50 px-2 py-0.5 rounded">
-                      ★ {p.rating.toFixed(1)}
-                    </span>
-                  </div>
-                  <h3 className="mt-1.5 text-base font-bold text-slate-900 leading-tight">
-                    {p.name}
-                  </h3>
-                  <p className="mt-1 text-xs text-slate-500 line-clamp-2">
-                    {p.desc}
-                  </p>
-                  <div className="mt-3 text-[10px] font-semibold text-slate-500 bg-slate-50 border p-1.5 rounded">
-                    🏭 {lang === "en" ? "Supplier:" : "विक्रेता:"} <span className="text-slate-800 font-bold">{p.vendor}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+        {loading ? (
+          <div className="text-center py-20 text-sm font-semibold text-slate-500">
+            {lang === "en" ? "Loading shop products..." : "पसलका सामग्रीहरू लोड हुँदै..."}
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-20 text-sm font-semibold text-slate-500">
+            {lang === "en" ? "No products available in this category." : "यस विधामा कुनै सामग्री उपलब्ध छैन।"}
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {filteredProducts.map((p) => (
+              <div
+                key={p.id}
+                className="group rounded-2xl border border-slate-200 bg-white p-5 hover:border-slate-350 transition-all hover:-translate-y-0.5 hover:shadow-lg flex flex-col justify-between"
+              >
                 <div>
-                  <span className="text-[10px] block text-slate-450 uppercase font-medium">Price</span>
-                  <span className="text-base font-black text-slate-900">
-                    Rs. {p.price.toLocaleString()} <span className="text-xs font-normal text-slate-500">/ {p.unit}</span>
-                  </span>
+                  {/* Visual Icon Box */}
+                  <div className="h-44 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-5xl transition-transform group-hover:scale-105 duration-350">
+                    {p.imageIcon}
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        {p.category === "Construction Material" ? "Material" : "Interior"}
+                      </span>
+                      <span className="text-[10px] text-[#1e6091] font-bold bg-blue-50/70 border border-blue-100/50 px-2 py-0.5 rounded">
+                        ★ {p.rating.toFixed(1)}
+                      </span>
+                    </div>
+                    <h3 className="mt-1.5 text-base font-bold text-slate-900 leading-tight">
+                      {p.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500 line-clamp-2">
+                      {p.desc}
+                    </p>
+                    <div className="mt-3 text-[10px] font-semibold text-slate-500 bg-slate-50 border p-1.5 rounded">
+                      🏭 {lang === "en" ? "Supplier:" : "विक्रेता:"} <span className="text-slate-800 font-bold">{p.vendor}</span>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  onClick={() => addToCart(p)}
-                  className="rounded-lg bg-[#0a2540] text-white p-2.5 hover:bg-[#1e6091] transition active:scale-95"
-                  title={lang === "en" ? "Add to Cart" : "बास्केटमा राख्नुहोस्"}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
+
+                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] block text-slate-450 uppercase font-medium">Price</span>
+                    <span className="text-base font-black text-slate-900">
+                      Rs. {p.price.toLocaleString()} <span className="text-xs font-normal text-slate-500">/ {p.unit}</span>
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => addToCart(p)}
+                    className="rounded-lg bg-[#0a2540] text-white p-2.5 hover:bg-[#1e6091] transition active:scale-95"
+                    title={lang === "en" ? "Add to Cart" : "बास्केटमा राख्नुहोस्"}
                   >
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Cart Slider Overlay */}

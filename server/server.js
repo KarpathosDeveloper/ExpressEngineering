@@ -361,6 +361,85 @@ app.get("/api/orders", (req, res) => {
   });
 });
 
+// -------------------------------------------------------------
+// PRODUCTS API (CRUD)
+// -------------------------------------------------------------
+
+// Get all products
+app.get("/api/products", (req, res) => {
+  db.all("SELECT * FROM products ORDER BY id DESC", [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
+// Add a new product
+app.post("/api/products", (req, res) => {
+  const { name, category, price, unit, vendor, rating, image_icon, description } = req.body;
+
+  if (!name || !category || !price || !unit || !vendor) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const query = `
+    INSERT INTO products (name, category, price, unit, vendor, rating, image_icon, description)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  db.run(
+    query,
+    [name, category, Number(price), unit, vendor, rating || 4.8, image_icon || "📦", description || ""],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json({ id: this.lastID, message: "Product added successfully" });
+    }
+  );
+});
+
+// Update a product
+app.put("/api/products/:id", (req, res) => {
+  const { id } = req.params;
+  const { name, category, price, unit, vendor, rating, image_icon, description } = req.body;
+
+  const query = `
+    UPDATE products SET 
+      name = ?, category = ?, price = ?, unit = ?, vendor = ?, rating = ?, image_icon = ?, description = ?
+    WHERE id = ?
+  `;
+
+  db.run(
+    query,
+    [name, category, Number(price), unit, vendor, rating || 4.8, image_icon || "📦", description || "", id],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json({ message: "Product updated successfully" });
+    }
+  );
+});
+
+// Delete a product
+app.delete("/api/products/:id", (req, res) => {
+  const { id } = req.params;
+  db.run("DELETE FROM products WHERE id = ?", [id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+    res.json({ message: "Product deleted successfully" });
+  });
+});
+
 if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
