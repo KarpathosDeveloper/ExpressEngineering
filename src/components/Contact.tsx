@@ -19,10 +19,22 @@ export default function Contact({ lang }: Props) {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+
+    const whatsappText = `I want the Engineering Services from the Express Engineering.\n\n` +
+      `*NEW CONTACT INQUIRY* 📬\n\n` +
+      `• *Name:* ${form.name}\n` +
+      `• *Email:* ${form.email}\n` +
+      `• *Phone:* ${form.phone}\n` +
+      `• *Service Required:* ${form.service}\n` +
+      `• *Message:* ${form.message}`;
+
+    const whatsappUrl = `https://wa.me/9779810555494?text=${encodeURIComponent(whatsappText)}`;
+    window.open(whatsappUrl, "_blank");
+
     setTimeout(() => {
       setSubmitted(false);
       setForm({ name: "", email: "", phone: "", service: t.services[0], message: "" });
-    }, 4000);
+    }, 2000);
   };
 
   return (
@@ -170,10 +182,10 @@ export default function Contact({ lang }: Props) {
                       {t.info.emailLabel}
                     </div>
                     <a
-                      href="mailto:info@expresseng.com.np"
+                      href="mailto:infoerexpress@gmail.com"
                       className="mt-0.5 block text-sm text-slate-800 hover:text-[#0a2540]"
                     >
-                      info@expresseng.com.np
+                      infoerexpress@gmail.com
                     </a>
                   </div>
                 </div>

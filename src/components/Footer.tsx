@@ -170,7 +170,7 @@ export default function Footer({ lang, setActiveTab }: Props) {
             <ul className="mt-4 space-y-3 text-sm">
               <li className="flex items-start gap-2.5">
                 <IconMapPin className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#d4a017]" />
-                <span className="text-blue-100/85">New Baneshwor, Kathmandu, Nepal</span>
+                <span className="text-blue-100/85">Urlabari, Morang, Nepal</span>
               </li>
               <li className="flex items-start gap-2.5">
                 <IconPhone className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#d4a017]" />
@@ -181,10 +181,10 @@ export default function Footer({ lang, setActiveTab }: Props) {
               <li className="flex items-start gap-2.5">
                 <IconMail className="mt-0.5 h-4 w-4 flex-shrink-0 text-[#d4a017]" />
                 <a
-                  href="mailto:info@expresseng.com.np"
+                  href="mailto:infoerexpress@gmail.com"
                   className="text-blue-100/85 hover:text-white"
                 >
-                  info@expresseng.com.np
+                  infoerexpress@gmail.com
                 </a>
               </li>
             </ul>

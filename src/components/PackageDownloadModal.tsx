@@ -58,7 +58,7 @@ export default function PackageDownloadModal({ lang, isOpen, onClose, packageKey
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       doc.text("An ISO 9001:2015 Quality Management Certified Company", 15, 26);
-      doc.text("New Baneshwor, Kathmandu, Nepal | info@expresseng.com.np", 15, 32);
+      doc.text("Urlabari, Morang, Nepal | infoerexpress@gmail.com", 15, 32);
 
       // Document Title
       doc.setTextColor(10, 37, 64);

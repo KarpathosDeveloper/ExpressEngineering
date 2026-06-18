@@ -363,7 +363,7 @@ export const translations: Translations = {
       info: {
         title: "Contact Information",
         addressLabel: "Head Office",
-        address: "New Baneshwor, Kathmandu, Nepal",
+        address: "Urlabari, Morang, Nepal",
         phoneLabel: "Phone",
         emailLabel: "Email",
         hoursLabel: "Working Hours",
@@ -667,7 +667,7 @@ export const translations: Translations = {
       info: {
         title: "सम्पर्क जानकारी",
         addressLabel: "प्रधान कार्यालय",
-        address: "नयाँ बानेश्वर, काठमाडौं, नेपाल",
+        address: "उर्लाबारी, मोरङ, नेपाल",
         phoneLabel: "फोन",
         emailLabel: "इमेल",
         hoursLabel: "कार्य समय",
