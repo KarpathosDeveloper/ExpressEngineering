@@ -276,16 +276,32 @@ app.put("/api/inquiries/:id", (req, res) => {
   const { id } = req.params;
   const { current_stage, status } = req.body;
 
-  const query = `
-    UPDATE inquiries SET current_stage = ?, status = ? WHERE id = ?
-  `;
+  const isNumeric = /^\d+$/.test(id);
+  const query = isNumeric
+    ? `UPDATE inquiries SET current_stage = ?, status = ? WHERE id = ?`
+    : `UPDATE inquiries SET current_stage = ?, status = ? WHERE inquiry_number = ?`;
 
-  db.run(query, [current_stage, status || "active", id], function (err) {
+  const paramValue = isNumeric ? parseInt(id, 10) : id;
+
+  db.run(query, [current_stage, status || "active", paramValue], function (err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    if (this.changes === 0) {
-      return res.status(404).json({ error: "Inquiry not found" });
+    const changes = this ? this.changes : 0;
+    if (changes === 0) {
+      // Fallback: try update by inquiry_number directly
+      const fallbackQuery = `UPDATE inquiries SET current_stage = ?, status = ? WHERE inquiry_number = ?`;
+      db.run(fallbackQuery, [current_stage, status || "active", id], function (err2) {
+        if (err2) {
+          return res.status(500).json({ error: err2.message });
+        }
+        const fallbackChanges = this ? this.changes : 0;
+        if (fallbackChanges === 0) {
+          return res.status(404).json({ error: "Inquiry not found" });
+        }
+        return res.json({ message: "Inquiry updated successfully" });
+      });
+      return;
     }
     res.json({ message: "Inquiry updated successfully" });
   });

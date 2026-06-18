@@ -337,10 +337,10 @@ export default function AdminConsole({ lang }: Props) {
   };
 
   // Inquiry update stage
-  const updateInquiryStage = async (id: number, newStage: string) => {
+  const updateInquiryStage = async (inquiryNumber: string, newStage: string) => {
     try {
       const API_BASE = import.meta.env.VITE_API_URL || "";
-      const res = await fetch(`${API_BASE}/api/inquiries/${id}`, {
+      const res = await fetch(`${API_BASE}/api/inquiries/${inquiryNumber}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ current_stage: newStage }),
@@ -752,7 +752,7 @@ export default function AdminConsole({ lang }: Props) {
                         <td className="text-right py-3">
                           <select
                             value={inq.current_stage}
-                            onChange={(e) => updateInquiryStage(inq.id, e.target.value)}
+                            onChange={(e) => updateInquiryStage(inq.inquiry_number, e.target.value)}
                             className="rounded border border-slate-200 bg-slate-50 p-1 text-[11px] font-semibold text-slate-700 outline-none focus:border-[#0a2540] focus:bg-white"
                           >
                             {stages.map((st) => (
