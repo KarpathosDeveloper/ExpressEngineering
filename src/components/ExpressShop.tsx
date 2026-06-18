@@ -188,7 +188,8 @@ export default function ExpressShop({ lang }: Props) {
         .map((item) => `- ${item.product.name} x${item.quantity} (Rs. ${item.product.price * item.quantity})`)
         .join("\n");
 
-      const text = `*NEW EXPRESS SHOP ORDER Placed* 🛒\n\n` +
+      const text = `I want the Engineering Services from the Express Engineering.\n\n` +
+        `*NEW EXPRESS SHOP ORDER Placed* 🛒\n\n` +
         `• *Client Name:* ${checkoutForm.name}\n` +
         `• *Contact:* ${checkoutForm.phone}\n` +
         `• *Delivery Address:* ${checkoutForm.address}\n\n` +

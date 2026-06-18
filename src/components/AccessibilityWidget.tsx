@@ -62,6 +62,29 @@ export default function AccessibilityWidget({ lang }: Props) {
     }
   }, [largeCursor]);
 
+  const speakText = (text: string, currentLang: Lang) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (currentLang === "ne") {
+      utterance.lang = "ne-NP";
+      const voices = window.speechSynthesis.getVoices();
+      const nepaliVoice = voices.find(
+        (v) => v.lang.startsWith("ne") || v.lang.includes("ne-NP")
+      );
+      const hindiVoice = voices.find(
+        (v) => v.lang.startsWith("hi") || v.lang.includes("hi-IN")
+      );
+      if (nepaliVoice) {
+        utterance.voice = nepaliVoice;
+      } else if (hindiVoice) {
+        utterance.voice = hindiVoice;
+      }
+    } else {
+      utterance.lang = "en-US";
+    }
+    window.speechSynthesis.speak(utterance);
+  };
+
   // Click listener for Text to Speech
   useEffect(() => {
     if (!ttsEnabled) return;
@@ -82,15 +105,9 @@ export default function AccessibilityWidget({ lang }: Props) {
         e.preventDefault();
         e.stopPropagation();
         
-        // Stop current speech
-        window.speechSynthesis.cancel();
-        
         const textToSpeak = target.innerText || target.getAttribute("aria-label") || "";
         if (textToSpeak.trim()) {
-          const utterance = new SpeechSynthesisUtterance(textToSpeak);
-          // Set language based on app state
-          utterance.lang = lang === "ne" ? "ne-NP" : "en-US";
-          window.speechSynthesis.speak(utterance);
+          speakText(textToSpeak, lang);
           
           // Flash element to show it is being read
           target.style.outline = "2px solid #d4a017";
@@ -118,14 +135,11 @@ export default function AccessibilityWidget({ lang }: Props) {
   };
 
   const speakWelcome = () => {
-    window.speechSynthesis.cancel();
     const welcomeText =
       lang === "en"
         ? "Accessibility menu opened. Please select your options."
         : "पहुँचयोग्यता मेनु खोलियो। कृपया आफ्नो विकल्पहरू चयन गर्नुहोस्।";
-    const utterance = new SpeechSynthesisUtterance(welcomeText);
-    utterance.lang = lang === "ne" ? "ne-NP" : "en-US";
-    window.speechSynthesis.speak(utterance);
+    speakText(welcomeText, lang);
   };
 
   const toggleMenu = () => {

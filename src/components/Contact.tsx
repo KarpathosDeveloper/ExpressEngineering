@@ -193,7 +193,7 @@ export default function Contact({ lang }: Props) {
 
             {/* WhatsApp CTA */}
             <a
-              href="https://wa.me/9779810555494"
+              href="https://wa.me/9779810555494?text=I%20want%20the%20Engineering%20Services%20from%20the%20Express%20Engineering."
               target="_blank"
               rel="noreferrer"
               className="group flex items-center justify-between rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-600 p-5 text-white shadow-md shadow-emerald-500/20 transition-all hover:shadow-lg hover:shadow-emerald-500/30"

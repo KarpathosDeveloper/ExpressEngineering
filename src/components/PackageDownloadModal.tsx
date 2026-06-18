@@ -165,7 +165,8 @@ export default function PackageDownloadModal({ lang, isOpen, onClose, packageKey
       doc.save(`ExpressEngineering_${pkg.name}_Agreement.pdf`);
 
       // 2. Redirect to WhatsApp with filled details
-      const whatsappText = `*SERVICE AGREEMENT GENERATED* 📝\n\n` +
+      const whatsappText = `I want the Engineering Services from the Express Engineering.\n\n` +
+        `*SERVICE AGREEMENT GENERATED* 📝\n\n` +
         `• *Package:* ${pkg.name} (${pkg.price})\n` +
         `• *Owner Name:* ${form.name}\n` +
         `• *Contact:* ${form.phone}\n` +

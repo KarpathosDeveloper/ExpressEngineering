@@ -7,7 +7,7 @@ export default function FloatingCTA({ lang }: Props) {
   return (
     <div className="fixed bottom-6 right-4 z-50 flex flex-col gap-3 lg:bottom-8 lg:right-8">
       <a
-        href="https://wa.me/9779810555494"
+        href="https://wa.me/9779810555494?text=I%20want%20the%20Engineering%20Services%20from%20the%20Express%20Engineering."
         target="_blank"
         rel="noreferrer"
         className="group flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg shadow-emerald-600/40 transition-all hover:bg-emerald-700 hover:shadow-xl active:scale-95"
